@@ -6,10 +6,8 @@ const postTopic = async (req, res) => {
   try {
     const lecture = await db.Lecture.findOne({ where: { id: req.body.lecture_id } });
     if (lecture) {
-      const topic = await db.Topic.findOne({ where: { name: req.body.name }});
+      const topic = await db.Topic.findOne({ where: { name: req.body.name } });
       if (topic === null) {
-        req.body['name'] = req.body.name;
-        req.body['lecture_id'] = req.body.lecture_id;
         const newTopic = await db.Topic.create(req.body);
         console.log('Topic created');
         res.status(200).send(newTopic);
@@ -28,13 +26,9 @@ const postTopic = async (req, res) => {
 };
 
 const updateTopic = async (req, res) => {
-  console.log(req.body.name);
-  console.log(req.params.topic_id);
   try {
     const topic = await db.Topic.findOne({ where: { id: req.params.topic_id } });
-    console.log(topic, 'WWWWWEEEE KNOW WE HIT IT BROOOOOOOO');
     if (topic) {
-      req.body['name'] = req.body.name;
       const updatedTopic = await topic.update(req.body);
       console.log('Topic updated');
       res.status(200).send(updatedTopic);

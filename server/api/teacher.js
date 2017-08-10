@@ -46,9 +46,8 @@ const fetchAllTeacherData = async (req, res) => {
 const fetchTeacher = async (req, res) => {
   try {
     const user = await db.User.findOne({ where: { email: req.params.email, userType: 0 } });
-    const data = await bcrypt.compare(req.params.creds, user.password);
-    if (data) {
-      // console.log('User Logged In: ', { user: user, id_token: hasher(`${req.params.email}`) });
+    const verified = await bcrypt.compare(req.params.creds, user.password);
+    if (verified) {
       res.status(200).send({ user, id_token: hasher(req.params.email) });
     } else {
       res.status(404).send('Credentials incorrect');
@@ -62,11 +61,8 @@ const fetchTeacher = async (req, res) => {
 // Sign Up Teacher with Async
 const postTeacher = async (req, res) => {
   try {
-    console.log('this is the req.body in postTeacher ', req.body);
     const salt = await bcrypt.genSalt(saltRounds);
-    console.log(salt, 'ok this that new salt fool');
     const hash = await bcrypt.hash(req.body.password, salt);
-    console.log('ok this that new password  ', hash);
     const person = await db.User.findOne({ where: { email: req.body.email } });
     if (person) {
       console.log('That email is taken. Please try another email.');
@@ -81,15 +77,11 @@ const postTeacher = async (req, res) => {
         username: req.body.username,
         image: req.body.image,
       });
-      if (newUser) {
-        console.log('Signed Up New User: ', { user: newUser, id_token: hasher(req.body.email) });
-        res.status(201).send({ user: newUser, id_token: hasher(req.body.email) });
-      } else {
-        console.log('Invalid Data In Req.Body: ', newUser);
-      }
+      console.log('Signed Up New User: ', { user: newUser, id_token: hasher(req.body.email) });
+      res.status(201).send({ user: newUser, id_token: hasher(req.body.email) });
     }
   } catch (error) {
-    console.log('Invalid Login Credentials');
+    console.log('Error in postTeacher ', error);
     res.status(404).send(error);
   }
 };
@@ -107,13 +99,8 @@ const updateTeacher = async (req, res) => {
         lName: req.body.lName,
         username: req.body.username,
       });
-      if (updatedTeacher) {
-        console.log('Teacher successfully updated ', updatedTeacher);
-        res.status(200).send({ teacher: updatedTeacher, auth_token: hasher(updatedTeacher.email) });
-      } else {
-        console.log('Missing a parameter');
-        res.status(500).send('Missing a parameter');
-      }
+      console.log('Teacher successfully updated ', updatedTeacher);
+      res.status(200).send({ teacher: updatedTeacher, auth_token: hasher(updatedTeacher.email) });
     } else {
       console.log('Teacher not found');
       res.status(404).send('Teacher not found');

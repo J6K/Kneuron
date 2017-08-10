@@ -3,21 +3,10 @@ const db = require('../db/models');
 const redis = require('../db/redis');
 
 const postQuestion = async (req, res) => {
-  console.log(req.body, ' THIS IS THE REQ DOT BODY   ');
   try {
-    const quiz = await db.Quiz.findOne({ where: { id: req.body.quiz_id } });
-    if (quiz) {
-      req.body['quiz_id'] = quiz.id;
-      req.body['name'] = req.body.name;
-      req.body['choices'] = req.body.choices;
-      req.body['correct'] = req.body.correct;
-      const newQuestion = await db.Question.create(req.body);
-      console.log('Question created');
-      res.status(200).send(newQuestion);
-    } else {
-      console.log('Topic not found');
-      res.status(404).send('Topic not found');
-    }
+    const newQuestion = await db.Question.create(req.body);
+    console.log('Question created');
+    res.status(200).send(newQuestion);
   } catch (error) {
     console.log('Error in postQuestion');
     res.status(500).send(error);
@@ -27,17 +16,9 @@ const postQuestion = async (req, res) => {
 const updateQuestion = async (req, res) => {
   try {
     const question = await db.Question.findOne({ where: { id: req.params.question_id } });
-    if (question) {
-      req.body['name'] = req.body.name;
-      req.body['choices'] = req.body.choices;
-      req.body['correct'] = req.body.correct;
-      const updatedQuestion = await question.update(req.body);
-      console.log('Question updated!');
-      res.status(200).send(updatedQuestion);
-    } else {
-      console.log('Question not found');
-      res.status(404).send('Question not found');
-    }
+    const updatedQuestion = await question.update(req.body);
+    console.log('Question updated!');
+    res.status(200).send(updatedQuestion);
   } catch (error) {
     console.log('Error in updateQuestion');
     res.status(500).send(error);
@@ -47,14 +28,9 @@ const updateQuestion = async (req, res) => {
 const deleteQuestion = async (req, res) => {
   try {
     const question = await db.Question.findOne({ where: { id: req.params.question_id } });
-    if (question) {
-      const deletedQuestion = question.destroy({ force: true });
-      console.log('Question deleted!');
-      res.status(200).send(deletedQuestion);
-    } else {
-      console.log('Question not found');
-      res.status(404).send('Question not found');
-    }
+    const deletedQuestion = await question.destroy({ force: true });
+    console.log('Question deleted!');
+    res.status(200).send(deletedQuestion);
   } catch (error) {
     console.log('Error in deleteQuestion');
     res.status(500).send(error);

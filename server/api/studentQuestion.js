@@ -3,18 +3,9 @@ const router = require('express').Router();
 
 const postStudentQuestion = async (req, res) => {
   try {
-    const topic = await db.Topic.findOne({ where: { id: req.body.topic_id } });
-    if (topic) {
-      req.body['question'] = req.body.question;
-      req.body['student_id'] = req.body.student_id;
-      req.body['topic_id'] = req.body.topic_id;
-      const studentQuestion = await db.StudentQuestion.create(req.body);
-      console.log('Student Question created');
-      res.status(200).send(studentQuestion);
-    } else {
-      console.log('Topic not found');
-      res.status(404).send('Topic not found');
-    }
+    const studentQuestion = await db.StudentQuestion.create(req.body);
+    console.log('Student Question created');
+    res.status(200).send(studentQuestion);
   } catch (error) {
     console.log('Error in postStudentQuestion');
     res.status(500).send(error);
@@ -36,7 +27,7 @@ const deleteStudentQuestion = async (req, res) => {
     console.log('Error in deleteStudentQuestion');
     res.status(500).send(error);
   }
-}
+};
 
 router.post('/', postStudentQuestion);
 router.delete('/:SQ_id', deleteStudentQuestion);

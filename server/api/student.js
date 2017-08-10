@@ -45,15 +45,15 @@ const fetchAllStudentData = async (req, res) => {
 const fetchStudent = async (req, res) => {
   try {
     const user = await db.User.findOne({ where: { email: req.params.email, userType: 1 } });
-    const data = await bcrypt.compare(req.params.creds, user.password);
-    if (data) {
-      console.log('User Logged In: ', { user: user, id_token: util.hasher(`${req.params.email}`) });
-      res.status(200).send({ user: user, id_token: util.hasher(req.params.email) });
+    const verified = await bcrypt.compare(req.params.creds, user.password);
+    if (verified) {
+      console.log('User Logged In: ', { user, id_token: util.hasher(`${req.params.email}`) });
+      res.status(200).send({ user, id_token: util.hasher(req.params.email) });
     } else {
       res.status(404).send('Credentials incorrect');
     }
   } catch (error) {
-    console.log('Error in fetchStudent',error);
+    console.log('Error in fetchStudent', error);
     res.status(500).send(error);
   }
 };
@@ -88,7 +88,6 @@ const postStudent = async (req, res) => {
 
 const updateStudent = async (req, res) => {
   try {
-    console.log(util.antiHasher(req.params.auth_token));
     const student = await db.User.findOne({ where: { email: util.antiHasher(req.params.auth_token) } });
     if (student) {
       const updatedStudent = await student.update({
@@ -96,13 +95,8 @@ const updateStudent = async (req, res) => {
         lName: req.body.lName,
         username: req.body.username,
       });
-      if (updatedStudent) {
-        console.log('Student successfully updated ', updatedStudent);
-        res.status(200).send({ student: updatedStudent, auth_token: util.hasher(updatedStudent.email) });
-      } else {
-        console.log('Missing a parameter');
-        res.status(500).send('Missing a parameter');
-      }
+      console.log('Student successfully updated ', updatedStudent);
+      res.status(200).send({ student: updatedStudent, auth_token: util.hasher(updatedStudent.email) });
     } else {
       console.log('Student not found');
       res.status(404).send('Student not found');
@@ -130,7 +124,6 @@ const deleteStudent = async (req, res) => {
   }
 };
 
-
 router.get('/:auth_token', fetchAllStudentData);
 router.get('/:email/:creds', fetchStudent);
 router.post('/', postStudent);
@@ -138,73 +131,3 @@ router.put('/:auth_token', updateStudent);
 router.delete('/:auth_token', deleteStudent);
 
 module.exports = router;
-
-
-
-
-
-
-
-
-// router.get('/:auth_token', (req, res, next) => {
-//   const studentEmail = antiHasher(req.params.auth_token);
-//   db.User.findOne({
-//     where: { email: studentEmail, userType: 1 },
-//     include: [{
-//       model: db.StudentCohort,
-//       include: [{
-//         model: db.Cohort,
-//         include: [{
-//           model: db.Lecture,
-//           include: [{
-//             model: db.Topic,
-//             include: [{
-//               model: db.Quiz,
-//               include: [{
-//                 model: db.Question,
-//               }],
-//             }],
-//           }],
-//         }],
-//       }],
-//     }],
-//   })
-//     .then(data => res.status(200).send(data))
-//     .catch(next);
-// });
-
-// router.get('/:email/:creds', (req, res, next) => {
-//   db.User.findOne({ where: { email: req.params.email } })
-//     .then((studentUser) => {
-//       const valid = bcrypt.compare(req.params.creds, studentUser.password);
-//       if (valid) {
-//         res.status(200).send({ user: studentUser, id_token: hasher(req.params.email) });
-//       }
-//     })
-//     .catch(next);
-// });
-
-
-// router.post('/', (req, res, next) => {
-//   req.body['fName'] = req.body.fName;
-//   req.body['lName'] = req.body.lName;
-//   req.body['userType'] = 1;
-//   req.body['email'] = req.body.email;
-//   req.body['password'] = req.body.password;
-//   req.body['username'] = req.body.username;
-//   db.User.findOrCreate({
-//     where: { email: req.body.email },
-//     defaults: req.body,
-//   })
-//     .spread((user, created) => {
-//       if (created) {
-//         res.status(200).send(user);
-//       }
-//     })
-//     .catch(next);
-// });
-
-// router.put('/:auth_token', updateStudent);
-
-// router.delete('/:auth_token', deleteStudent);
-
