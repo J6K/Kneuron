@@ -7,29 +7,17 @@ const redis = require('../db/redis');
 const postAnswer = async (req, res) => {
   try {
     const question = await db.Question.findOne({ where: { id: req.body.question_id } });
-    if (question) {
-      if (question.correct === req.body.selected) {
-        req.body['question_id'] = question.id;
-        req.body['student_id'] = req.body.student_id;
-        req.body['selected'] = req.body.selected;
-        req.body['isCorrect'] = true;
-        const postedAnswer = await db.Answer.create(req.body);
-        res.status(200).send(postedAnswer);
-      } else {
-        req.body['question_id'] = question.id;
-        req.body['student_id'] = req.body.student_id;
-        req.body['selected'] = req.body.selected;
-        req.body['isCorrect'] = false;
-        const postedAnswer = await db.Answer.create(req.body);
-        console.log('Answer created!');
-        res.status(200).send(postedAnswer);
-      }
+    if (question.correct === req.body.selected) {
+      req.body['isCorrect'] = true;
+      const postedAnswer = await db.Answer.create(req.body);
+      res.status(200).send(postedAnswer);
     } else {
-      console.log('Question not found');
-      res.status(404).send('Question not found');
+      req.body['isCorrect'] = false;
+      const postedAnswer = await db.Answer.create(req.body);
+      res.status(200).send(postedAnswer);
     }
   } catch (error) {
-    console.log('Error in postAnswer ', error);
+    console.log('Error in postAnswer ', error.message);
     res.status(500).send(error);
   }
 };
