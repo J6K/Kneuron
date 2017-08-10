@@ -4,20 +4,14 @@ const redis = require('../db/models');
 
 const postTopic = async (req, res) => {
   try {
-    const lecture = await db.Lecture.findOne({ where: { id: req.body.lecture_id } });
-    if (lecture) {
-      const topic = await db.Topic.findOne({ where: { name: req.body.name } });
-      if (topic === null) {
-        const newTopic = await db.Topic.create(req.body);
-        console.log('Topic created');
-        res.status(200).send(newTopic);
-      } else {
-        console.log('Topic already exists: ', topic);
-        res.status(200).send(topic);
-      }
+    const topic = await db.Topic.findOne({ where: { name: req.body.name } });
+    if (topic === null) {
+      const newTopic = await db.Topic.create(req.body);
+      console.log('Topic created');
+      res.status(200).send(newTopic);
     } else {
-      console.log('Lecture not found');
-      res.status(404).send('Lecture not found');
+      console.log('Topic already exists: ', topic);
+      res.status(200).send(topic);
     }
   } catch (error) {
     console.log('Error in postTopic');
